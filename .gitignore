@@ -1,0 +1,474 @@
+# Unified Network Platform - Git Ignore
+
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+test-results.xml
+bandit-report.json
+safety-report.json
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# =============================================================================
+# Node.js
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+package-lock.json
+yarn.lock
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# =============================================================================
+# Application Data
+# =============================================================================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+data/
+backups/
+
+# Log files
+*.log
+logs/
+*.log.*
+
+# Configuration files with secrets
+.env
+.env.local
+.env.production
+.env.development
+config/secrets/
+config/ssl/
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# MCP Memory
+.claude-memory/
+mcp_progress/
+
+# Application caches
+.cache/
+cache/
+tmp/
+
+# Reports and exports
+reports/
+exports/
+*.csv
+*.xlsx
+*.json.backup
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Editor backups
+*~
+*.bak
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =============================================================================
+# Docker
+# =============================================================================
+Dockerfile.dev
+docker-compose.override.yml
+docker-compose.local.yml
+
+# =============================================================================
+# Deployment
+# =============================================================================
+
+# Kubernetes secrets
+*-secret.yaml
+*-secrets.yaml
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# Deployment scripts with secrets
+deploy-prod.sh
+deploy-staging.sh
+
+# =============================================================================
+# Application Specific
+# =============================================================================
+
+# FortiManager/FortiGate exports
+*.conf.backup
+device_configs/
+network_topology.json
+
+# Utility outputs
+utility_outputs/
+scan_results/
+ssl_certificates/
+
+# Investigation results
+investigation_*/
+security_reports/
+
+# Voice command recordings (if any)
+voice_recordings/
+*.wav
+*.mp3
+
+# Network discovery results
+discovered_devices.json
+network_scan_*.json
+
+# Topology visualizations
+topology_*.png
+topology_*.svg
+network_diagrams/
+
+# SSL/Certificate files
+certificates/
+ssl_tests/
+
+# Performance monitoring data
+metrics/
+monitoring_data/
+
+# Backup files
+*.backup
+backup_*/
+
+# Temporary working files
+working/
+scratch/
+test_data/
+
+# Large binary files
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# =============================================================================
+# Security
+# =============================================================================
+
+# Credential files
+credentials.json
+secrets.yaml
+api_keys.txt
+passwords.txt
+
+# Private keys
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.pem
+*.key
+
+# Certificate files
+*.csr
+*.der
+
+# GPG files
+*.gpg
+*.asc
+
+# =============================================================================
+# Platform Specific
+# =============================================================================
+
+# Application logs
+application.log
+voice_commands.log
+utilities.log
+access.log
+error.log
+audit.log
+
+# Database backups
+*.sql
+*.dump
+
+# Configuration backups
+config_backup_*/
+
+# MCP Memory backups
+memory_backup_*/
+
+# System health reports
+health_report_*.json
+system_status_*.json
+
+# Performance profiling
+*.prof
+profiling_results/
+
+# Load testing results
+load_test_*/
+performance_test_*/
+
+# =============================================================================
+# Documentation Build
+# =============================================================================
+docs/_build/
+docs/build/
+site/
+
+# =============================================================================
+# Local Development
+# =============================================================================
+.local/
+local_config/
+dev_data/
+test_instances/
+
+# =============================================================================
+# CI/CD
+# =============================================================================
+.github/workflows/*.local.yml
+.gitlab-ci.local.yml
+ci_reports/
+
+# =============================================================================
+# Monitoring and Observability
+# =============================================================================
+prometheus_data/
+grafana_data/
+elasticsearch_data/
+
+# =============================================================================
+# Custom Ignores
+# =============================================================================
+# Add any project-specific files to ignore below this line
+
+# Consolidation workspace (development only)
+consolidation_workspace/temp/
+consolidation_workspace/*.tmp
+
+# Network device configurations (sensitive)
+device_configs_*/
+fortigate_configs/
+meraki_configs/
+
+# Brand-specific data (may contain sensitive info)
+brand_data/
+store_data/
+
+# Custom utility outputs
+custom_utilities/
+utility_plugins/

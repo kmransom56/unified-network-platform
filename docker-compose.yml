@@ -1,0 +1,287 @@
+version: '3.8'
+
+services:
+  # Main Application Service
+  unified-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: unified-network-platform
+    ports:
+      - "5000:5000"
+      - "9090:9090"  # Metrics port
+    volumes:
+      # Configuration
+      - ./config:/app/config:ro
+      - ./.env:/app/.env:ro
+      
+      # Data persistence
+      - platform_data:/app/data
+      - claude_memory:/app/.claude-memory
+      
+      # Logs
+      - platform_logs:/app/logs
+      
+      # SSL certificates (if using HTTPS)
+      - ./config/ssl:/app/ssl:ro
+    environment:
+      # Override environment variables
+      - APP_MODE=production
+      - DATABASE_URL=sqlite:///./data/network_management.db
+      - MCP_MEMORY_PATH=/app/.claude-memory
+      - LOG_LEVEL=INFO
+    env_file:
+      - .env
+    networks:
+      - platform_network
+    restart: unless-stopped
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '1.0'
+
+  # Redis Cache Service
+  redis:
+    image: redis:7-alpine
+    container_name: platform_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - platform_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # PostgreSQL Database (Alternative to SQLite for production)
+  postgres:
+    image: postgres:15-alpine
+    container_name: platform_postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./config/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      - POSTGRES_DB=network_management
+      - POSTGRES_USER=platform_user
+      - POSTGRES_PASSWORD=secure_password_change_in_production
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --locale=en_US.UTF-8
+    networks:
+      - platform_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U platform_user -d network_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+    profiles:
+      - with-postgres
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: platform_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/sites-available:/etc/nginx/sites-available:ro
+      - ./config/ssl:/etc/nginx/ssl:ro
+      - ./web/static:/var/www/static:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - platform_network
+    restart: unless-stopped
+    depends_on:
+      - unified-platform
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - with-nginx
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: platform_prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://localhost:9091'
+    networks:
+      - platform_network
+    restart: unless-stopped
+    profiles:
+      - with-monitoring
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: platform_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin_password_change_in_production
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    networks:
+      - platform_network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    profiles:
+      - with-monitoring
+
+  # Development Database Admin (pgAdmin)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: platform_pgadmin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@company.com
+      - PGADMIN_DEFAULT_PASSWORD=admin_password_change_in_production
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    networks:
+      - platform_network
+    restart: unless-stopped
+    profiles:
+      - development
+
+  # Log Aggregation (ELK Stack - Elasticsearch)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: platform_elasticsearch
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+    networks:
+      - platform_network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    profiles:
+      - with-logging
+
+  # Log Processing (Logstash)
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.0
+    container_name: platform_logstash
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    volumes:
+      - ./config/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./config/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - platform_logs:/logs:ro
+    networks:
+      - platform_network
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    profiles:
+      - with-logging
+
+  # Log Visualization (Kibana)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.0
+    container_name: platform_kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_NAME=platform_kibana
+    networks:
+      - platform_network
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    profiles:
+      - with-logging
+
+# Named Volumes for Data Persistence
+volumes:
+  platform_data:
+    driver: local
+  claude_memory:
+    driver: local
+  platform_logs:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  nginx_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+
+# Networks
+networks:
+  platform_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
